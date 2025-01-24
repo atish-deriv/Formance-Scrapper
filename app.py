@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import json
+import time
 from datetime import datetime
 from dotenv import load_dotenv
 from langchain.embeddings.openai import OpenAIEmbeddings
@@ -13,43 +14,6 @@ from pinecone import Pinecone
 
 # Load environment variables
 load_dotenv()
-
-# Define response guidelines
-RESPONSE_GUIDELINES = """Guidelines for providing detailed responses:
-1. **Accuracy First**
-   - Only provide information that is explicitly present in the documentation
-   - If information is not found in the context, clearly state that you cannot find it
-   - Never make assumptions or infer functionality that isn't documented
-   - Command and API validation: After constructing a command or API description, review it to ensure all flags and parameters align with the context.
-
-2. **Start with a Clear Overview**
-   - Begin with a high-level explanation of the concept
-   - Highlight key points that will be covered
-
-3. **Provide Detailed Explanations**
-   - Break down complex concepts into digestible parts
-   - Use clear, technical language while remaining accessible
-   - Include specific examples to illustrate points
-   - Reference relevant documentation sections
-
-4. **Include Practical Examples**
-   - Provide code snippets when relevant
-   - Show real-world use cases
-   - Explain step-by-step implementations
-   - Include configuration examples if applicable
-
-5. **Best Practices and Considerations**
-   - Highlight important considerations
-   - Share recommended practices
-   - Mention common pitfalls to avoid
-   - Discuss performance implications if relevant
-
-6. **Related Information**
-   - Connect to related concepts or features
-   - Suggest relevant documentation sections
-   - Mention alternative approaches if applicable
-
-If you're unsure about any information, acknowledge the uncertainty rather than making assumptions. Aim to provide actionable insights that help users implement solutions effectively."""
 
 # Initialize session state
 if 'conversation' not in st.session_state:
@@ -108,7 +72,41 @@ DATA PROCESSING GUIDELINES (STRICTLY FOLLOW THESE):
 5. WHEN YOU ARE PROVIDING DETAILS ABOUT A COMMAND OR API MAKE SURE THE PARAMETERS ARE CORRECTLY SPECIFIED AND THE COMMAND OR API IS CORRECTLY SPECIFIED.
 6. BEFORE PROVIDING ANY COMMAND OR API IN THE OUTPUT USE CHAIN OF THOUGHTS AND VARIFY THE COMMAND IS CORRECT.
 
-{RESPONSE_GUIDELINES}
+Guidelines for providing detailed responses:
+1. **Accuracy First**
+   - Only provide information that is explicitly present in the documentation
+   - If information is not found in the context, clearly state that you cannot find it
+   - Never make assumptions or infer functionality that isn't documented
+   - Command and API validation: After constructing a command or API description, review it to ensure all flags and parameters align with the context.
+
+2. **Start with a Clear Overview**
+   - Begin with a high-level explanation of the concept
+   - Highlight key points that will be covered
+
+3. **Provide Detailed Explanations**
+   - Break down complex concepts into digestible parts
+   - Use clear, technical language while remaining accessible
+   - Include specific examples to illustrate points
+   - Reference relevant documentation sections
+
+4. **Include Practical Examples**
+   - Provide code snippets when relevant
+   - Show real-world use cases
+   - Explain step-by-step implementations
+   - Include configuration examples if applicable
+
+5. **Best Practices and Considerations**
+   - Highlight important considerations
+   - Share recommended practices
+   - Mention common pitfalls to avoid
+   - Discuss performance implications if relevant
+
+6. **Related Information**
+   - Connect to related concepts or features
+   - Suggest relevant documentation sections
+   - Mention alternative approaches if applicable
+
+If you're unsure about any information, acknowledge the uncertainty rather than making assumptions. Aim to provide actionable insights that help users implement solutions effectively.
 
 Context Information:
 {{context}}
@@ -129,7 +127,7 @@ Assistant:
     # Create chain
     chain = ConversationalRetrievalChain.from_llm(
         llm=ChatOpenAI(
-            model_name="gpt-4o-mini",
+            model_name="gpt-4",
             temperature=0.2,
             openai_api_key=os.getenv('OPENAI_API_KEY')
         ),
@@ -208,7 +206,6 @@ if query:
             initial_answer = response.get('answer', "I apologize, but I couldn't find relevant information to answer your question.")
             sources = response.get('source_documents', [])
         
-        
         # Step 2: Technical validation
         with st.spinner("🔍 Validating technical details..."):
             # Initialize validation chain if not exists
@@ -216,16 +213,9 @@ if query:
                 st.session_state.validation_chain = initialize_validation_chain()
             
             # Validation prompt
-            validation_prompt = f"""You are a strict technical validation agent for Formance documentation. Your primary responsibility is to ensure all commands, APIs, and technical details are EXACTLY as specified in the source documentation.
+            validation_prompt = f"""You are a technical validation agent for Formance documentation. Your task is to validate technical details and provide a properly formatted response.
 
-CRITICAL FORMAT RULES:
-1. DO NOT add any explanatory notes about corrections
-2. DO NOT add any text about validation or changes made
-3. DO NOT modify the structure or formatting of the response
-4. ONLY modify the specific technical details (commands, APIs, parameters) that need correction
-5. Keep all other content, formatting, and structure EXACTLY the same
-
-VALIDATION TASK (CRITICAL - DO NOT MODIFY RESPONSE FORMAT):
+VALIDATION RULES:
 1. COMMAND VALIDATION (CRITICAL):
    - Check every command against the source documentation
    - Only allow command flags and parameters that are EXPLICITLY shown in the documentation
@@ -242,12 +232,78 @@ VALIDATION TASK (CRITICAL - DO NOT MODIFY RESPONSE FORMAT):
    - Validate technical specifications and requirements
    - Check environment variables and their usage
 
-4. RESPONSE HANDLING (CRITICAL):
-   - If technical details are correct, return the initial answer exactly as is
-   - If corrections are needed, modify ONLY the technical parts
-   - Maintain the original response format and structure
-   - Add a note when technical corrections are made
-5.{RESPONSE_GUIDELINES}
+RESPONSE FORMAT (CRITICAL - MUST FOLLOW EXACTLY):
+
+# Overview
+A clear, high-level explanation of the concept or task.
+
+# Detailed Explanation
+Step-by-step breakdown of how the feature or process works.
+
+# Implementation
+Technical details with commands in code blocks:
+```bash
+# Example with real values:
+command --flag value
+```
+
+# Example Usage
+```bash
+# Real-world example with actual values
+command --flag=example-value
+```
+
+# Best Practices
+Important considerations and recommendations.
+
+# Additional Information
+Related concepts and references.
+
+CRITICAL RULES:
+- Use proper markdown headers with #
+- All commands must be in ```bash code blocks
+- Include example usage with real values
+- Only include parameters explicitly shown in documentation
+- Never explain corrections or validation
+- Maintain consistent formatting throughout
+
+1. **Accuracy First**
+   - Only provide information that is explicitly present in the documentation
+   - If information is not found in the context, clearly state that you cannot find it
+   - Never make assumptions or infer functionality that isn't documented
+   - Command and API validation: After constructing a command or API description, review it to ensure all flags and parameters align with the context.
+
+2. **Start with a Clear Overview**
+   - Begin with a high-level explanation of the concept
+   - Highlight key points that will be covered
+
+3. **Provide Detailed Explanations**
+   - Break down complex concepts into digestible parts
+   - Use clear, technical language while remaining accessible
+   - Include specific examples to illustrate points
+   - Reference relevant documentation sections
+
+4. **Include Practical Examples**
+   - Provide code snippets when relevant
+   - Show real-world use cases
+   - Explain step-by-step implementations
+   - Include configuration examples if applicable
+
+5. **Best Practices and Considerations**
+   - Highlight important considerations
+   - Share recommended practices
+   - Mention common pitfalls to avoid
+   - Discuss performance implications if relevant
+
+6. **Related Information**
+   - Connect to related concepts or features
+   - Suggest relevant documentation sections
+   - Mention alternative approaches if applicable
+
+If you're unsure about any information, acknowledge the uncertainty rather than making assumptions. Aim to provide actionable insights that help users implement solutions effectively.
+
+
+IMPORTANT: Never add explanatory notes about corrections or mention validation.
 
 Question: {query}
 Initial Answer: {initial_answer}
@@ -255,9 +311,9 @@ Sources: {[doc.page_content for doc in sources]}
 
 IMPORTANT: 
 - Only include commands, parameters, and technical details that are EXPLICITLY shown in the source documentation
-- Do not add any explanatory notes about corrections
-- Maintain the exact same response format as the initial answer
-- Only modify the technical details themselves, nothing else"""
+- Provide a complete, final response that follows the format guidelines
+- Never mention that you're validating or correcting anything
+- Focus on delivering accurate, well-structured information"""
 
             # Get validated answer
             validation_response = st.session_state.validation_chain.invoke(validation_prompt)
@@ -268,12 +324,19 @@ IMPORTANT:
             # Add to chat history
             st.session_state.chat_history.append((query, final_answer))
             
-            # Display current response
-            if final_answer == initial_answer:
-                st.write("### Response:")
-            else:
-                st.write("### Technically Validated Response:")
-            st.write(final_answer)
+            # Create a container for the response header
+            response_container = st.empty()
+            response_container.markdown("### Response:")
+            
+            # Create a container for the streaming text
+            text_container = st.empty()
+            
+            # Stream the response character by character
+            response_text = ""
+            for char in final_answer:
+                response_text += char
+                text_container.markdown(response_text)
+                time.sleep(0.01)  # Adjust speed as needed
             
             # Display sources with proper markdown formatting
             if sources:
