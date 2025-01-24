@@ -50,6 +50,16 @@ def initialize_chain():
     # Custom prompt template
     prompt_template = """You are a friendly and knowledgeable assistant specializing in Formance documentation. Your goal is to provide comprehensive, well-structured responses that include practical examples whenever possible.
 IMPORTANT GUIDELINES: THIS NEEDS TO BE STRICTLY FOLLOWED AND NOT IGNORED OR SKIPPED.
+
+DATA PROCESSING GUIDELINES (STRICTLY FOLLOW THESE):
+
+1. UNDERSTAND THE QUESTION AND THE CONTEXT PROVIDED.
+2. ALWAYS ANSWER THE QUESTION FROM THE CONTEXT PROVIDED.
+3. IF THE INFORMATION IS MISSING IN THE CONTEXT STRICTLY STATE THAT YOU CANNOT FIND THE INFORMATION.
+4. NEVER MAKE ASSUMPTIONS OR INFER FUNCTIONALITY THAT IS NOT IN THE CONTEXT.
+5. WHEN YOU ARE PROVIDING DETAILS ABOUT A COMMAND OR API MAKE SURE THE PARAMETERS ARE CORRECTLY SPECIFIED AND THE COMMAND OR API IS CORRECTLY SPECIFIED.
+
+
 Guidelines for providing detailed responses:
 1. **Accuracy First**
    - Only provide information that is explicitly present in the documentation
@@ -105,12 +115,13 @@ Assistant:
     chain = ConversationalRetrievalChain.from_llm(
         llm=ChatOpenAI(
             model_name="gpt-4o-mini",
-            temperature=0.3,
+            temperature=0.2,
             openai_api_key=os.getenv('OPENAI_API_KEY')
         ),
         retriever=vectorstore.as_retriever(
             search_kwargs={"k": 20},
-            search_type="similarity"
+            search_type="similarity",
+            score_threshold=0.50
         ),
         memory=memory,
         combine_docs_chain_kwargs={
