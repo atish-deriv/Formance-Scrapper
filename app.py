@@ -72,41 +72,23 @@ DATA PROCESSING GUIDELINES (STRICTLY FOLLOW THESE):
 5. WHEN YOU ARE PROVIDING DETAILS ABOUT A COMMAND OR API MAKE SURE THE PARAMETERS ARE CORRECTLY SPECIFIED AND THE COMMAND OR API IS CORRECTLY SPECIFIED.
 6. BEFORE PROVIDING ANY COMMAND OR API IN THE OUTPUT USE CHAIN OF THOUGHTS AND VARIFY THE COMMAND IS CORRECT.
 
-Guidelines for providing detailed responses:
-1. **Accuracy First**
-   - Only provide information that is explicitly present in the documentation
-   - If information is not found in the context, clearly state that you cannot find it
-   - Never make assumptions or infer functionality that isn't documented
-   - Command and API validation: After constructing a command or API description, review it to ensure all flags and parameters align with the context.
+RESPONSE GENERATION GUIDELINES:
 
-2. **Start with a Clear Overview**
-   - Begin with a high-level explanation of the concept
-   - Highlight key points that will be covered
-
-3. **Provide Detailed Explanations**
-   - Break down complex concepts into digestible parts
-   - Use clear, technical language while remaining accessible
-   - Include specific examples to illustrate points
-   - Reference relevant documentation sections
-
-4. **Include Practical Examples**
-   - Provide code snippets when relevant
-   - Show real-world use cases
-   - Explain step-by-step implementations
-   - Include configuration examples if applicable
-
-5. **Best Practices and Considerations**
-   - Highlight important considerations
-   - Share recommended practices
-   - Mention common pitfalls to avoid
-   - Discuss performance implications if relevant
-
-6. **Related Information**
-   - Connect to related concepts or features
-   - Suggest relevant documentation sections
-   - Mention alternative approaches if applicable
+1. ALWAYS PROVIDE A CLEAR AND CONCISE RESPONSE.
+2. BE DESCRIPTIVE AND PROVIDE EXAMPLES WHEN POSSIBLE.
+3. TRY TO COVER ALL THE POINTS MENTIONED IN THE QUESTION.
+4. RESPONSE NEEDS TO BE FOCUSED ON THE QUESTION AND SHOULD NOT BE OUTSIDE OF THE PROVIDED CONTEXT.
+5. IF THERE IS MULTIPLE WAYS TO DO THE SAME THING, PROVIDE ALL THE WAYS.
+    - Example: If the question is about how to do something, provide all the ways to do it.
+    like:
+    - Using command
+    - Using API
+    - Using UI
+    - Using SDK
+6. IF THE QUESTION IS NOT CLEAR, ASK FOR CLARITY.
 
 If you're unsure about any information, acknowledge the uncertainty rather than making assumptions. Aim to provide actionable insights that help users implement solutions effectively.
+
 
 Context Information:
 {{context}}
@@ -128,7 +110,7 @@ Assistant:
     chain = ConversationalRetrievalChain.from_llm(
         llm=ChatOpenAI(
             model_name="gpt-4",
-            temperature=0.2,
+            temperature=0.0,
             openai_api_key=os.getenv('OPENAI_API_KEY')
         ),
         retriever=vectorstore.as_retriever(
@@ -213,51 +195,64 @@ if query:
                 st.session_state.validation_chain = initialize_validation_chain()
             
             # Validation prompt
-            validation_prompt = f"""You are a technical validation agent for Formance documentation. Your task is to validate technical details and provide a properly formatted response.
+            validation_prompt = f"""You are a strict technical validation agent for Formance documentation. Your task is to validate technical details strictly and provide a properly formatted response in a friendly and professional manner like an expert. YOU HAVE A CLEAR AND STRICT SET OF GUIDELINES TO FOLLOW MENTIONED BELOW. IF THE FIRST AGENT IS NOT CLEAR ABOUT THE QUESTION, ASK FOR CLARITY DIRECTLY.
 
 VALIDATION RULES:
 1. COMMAND VALIDATION (CRITICAL):
-   - Check every command against the source documentation
-   - Only allow command flags and parameters that are EXPLICITLY shown in the documentation
-   - Remove any parameters or options that are not present in the source documentation
-   - If a command is modified, add a note explaining what was removed and why
+   - CHECK EVERY COMMAND AGAINST THE SOURCE DOCUMENTATION
+   - ONLY ALLOW COMMAND FLAGS AND PARAMETERS THAT ARE EXPLICITLY SHOWN IN THE DOCUMENTATION
+   - REMOVE ANY PARAMETERS OR OPTIONS THAT ARE NOT PRESENT IN THE SOURCE DOCUMENTATION
+   - IF A COMMAND IS NOT PRESENT IN THE DOCUMENTATION, REMOVE IT FROM THE ANSWER AND READJUST THE ANSWER IN THE CORRECT MANNER.
 
 2. API VALIDATION (CRITICAL):
-   - Verify all API endpoints exactly match the documentation
-   - Validate all parameters and their types
-   - Ensure request/response formats are accurate
-
+   - VERIFY ALL API ENDPOINTS EXACTLY MATCH THE DOCUMENTATION
+   - VALIDATE ALL PARAMETERS AND THEIR TYPES
+   - ENSURE REQUEST/RESPONSE FORMATS ARE ACCURATE
+   
 3. TECHNICAL DETAILS (CRITICAL):
-   - Verify configuration settings against documentation
-   - Validate technical specifications and requirements
-   - Check environment variables and their usage
+   - VERIFY ALL TECHNICAL DETAILS AND SPECIFICATIONS AGAINST THE DOCUMENTATION
+   - VALIDATE ALL TECHNICAL DETAILS AND SPECIFICATIONS
+   - CHECK ENVIRONMENT VARIABLES AND THEIR USAGE
 
 RESPONSE FORMAT (CRITICAL - MUST FOLLOW EXACTLY):
 
-# Overview
-A clear, high-level explanation of the concept or task.
+INSTRUCTIONS:
 
-# Detailed Explanation
-Step-by-step breakdown of how the feature or process works.
+1. **Start with a Clear Overview (CRITICAL)**
+   - Begin with a high-level explanation of the concept, it has to short and concise.
+   - Highlight key points that will be covered
 
-# Implementation
-Technical details with commands in code blocks:
-```bash
-# Example with real values:
-command --flag value
-```
+2. **Provide Detailed Explanations (CRITICAL)**
+   - Break down complex concepts into digestible parts
+   - Use clear, technical language while remaining accessible
+   - Include specific examples to illustrate points
+   - Reference relevant documentation sections
 
-# Example Usage
-```bash
-# Real-world example with actual values
-command --flag=example-value
-```
+3. **Include End to End Practical Examples (MUST BE INCLUDED) (CRITICAL)**
+    - Provide code snippets when relevant.
+    - Show real-world use cases.
+    - Explain step-by-step implementations.
+    - Include configuration examples if applicable.
+    - Provide real-world examples with actual values.
+    - When answering technical questions, demonstrate the entire workflow by:
+        - Starting from initial configuration or setup.
+        - Progressing through each step involved in the process.
+        - Concluding with the expected outcome or result.
+        - Ensure that each step is clearly delineated and includes actual values or parameters used in real scenarios.
+   
 
-# Best Practices
-Important considerations and recommendations.
+4. **Best Practices and Considerations (WORTH TO MENTION)**
+   - Highlight important considerations
+   - Share recommended practices
+   - Mention common pitfalls to avoid
+   - Discuss performance implications if relevant
 
-# Additional Information
-Related concepts and references.
+5. **Related Information (GOOD TO HAVE)**
+   - Connect to related concepts or features
+   - Suggest relevant documentation sections
+   - Mention alternative approaches if applicable
+
+If you're unsure about any information, acknowledge the uncertainty rather than making assumptions. Aim to provide actionable insights that help users implement solutions effectively.
 
 CRITICAL RULES:
 - Use proper markdown headers with #
@@ -267,53 +262,17 @@ CRITICAL RULES:
 - Never explain corrections or validation
 - Maintain consistent formatting throughout
 
-1. **Accuracy First**
-   - Only provide information that is explicitly present in the documentation
-   - If information is not found in the context, clearly state that you cannot find it
-   - Never make assumptions or infer functionality that isn't documented
-   - Command and API validation: After constructing a command or API description, review it to ensure all flags and parameters align with the context.
-
-2. **Start with a Clear Overview**
-   - Begin with a high-level explanation of the concept
-   - Highlight key points that will be covered
-
-3. **Provide Detailed Explanations**
-   - Break down complex concepts into digestible parts
-   - Use clear, technical language while remaining accessible
-   - Include specific examples to illustrate points
-   - Reference relevant documentation sections
-
-4. **Include Practical Examples**
-   - Provide code snippets when relevant
-   - Show real-world use cases
-   - Explain step-by-step implementations
-   - Include configuration examples if applicable
-
-5. **Best Practices and Considerations**
-   - Highlight important considerations
-   - Share recommended practices
-   - Mention common pitfalls to avoid
-   - Discuss performance implications if relevant
-
-6. **Related Information**
-   - Connect to related concepts or features
-   - Suggest relevant documentation sections
-   - Mention alternative approaches if applicable
-
-If you're unsure about any information, acknowledge the uncertainty rather than making assumptions. Aim to provide actionable insights that help users implement solutions effectively.
-
-
-IMPORTANT: Never add explanatory notes about corrections or mention validation.
+IMPORTANT: 
+- Only include commands, parameters, and technical details that are EXPLICITLY shown in the source documentation
+- Provide a complete, final response that follows the format guidelines
+- Never mention that you're validating or correcting anything
+- Focus on delivering accurate, well-structured information
 
 Question: {query}
 Initial Answer: {initial_answer}
 Sources: {[doc.page_content for doc in sources]}
 
-IMPORTANT: 
-- Only include commands, parameters, and technical details that are EXPLICITLY shown in the source documentation
-- Provide a complete, final response that follows the format guidelines
-- Never mention that you're validating or correcting anything
-- Focus on delivering accurate, well-structured information"""
+ASSISTANT: """
 
             # Get validated answer
             validation_response = st.session_state.validation_chain.invoke(validation_prompt)
@@ -336,7 +295,7 @@ IMPORTANT:
             for char in final_answer:
                 response_text += char
                 text_container.markdown(response_text)
-                time.sleep(0.01)  # Adjust speed as needed
+                time.sleep(0.001)  # Adjust speed as needed
             
             # Display sources with proper markdown formatting
             if sources:
