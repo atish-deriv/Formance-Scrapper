@@ -151,7 +151,7 @@ if st.session_state.conversation is None:
 # Streamlit interface
 st.title("Formance Assistant")
 st.write("Ask me anything about Formance! I'll help you find the information you need.")
-st.markdown("<small> ***Note:*** This is a beta version and the responses may not be 100% accurate. Please use with caution. Current version is 0.2.0</small>", unsafe_allow_html=True)
+st.markdown("<small> ***Note:*** This is a beta version and the responses may not be 100% accurate. Please use with caution. Current version is 0.2.1</small>", unsafe_allow_html=True)
 
 # Display chat history
 for idx, (question, answer) in enumerate(st.session_state.chat_history):
