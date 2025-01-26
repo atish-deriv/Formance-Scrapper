@@ -26,7 +26,7 @@ def initialize_validation_chain():
     # Create validation chain
     validation_chain = ChatOpenAI(
         model_name="gpt-4o-mini",
-        temperature=0.1,
+        temperature=0.0,
         openai_api_key=os.getenv('OPENAI_API_KEY')
     )
     
