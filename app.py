@@ -110,7 +110,7 @@ Assistant:
     chain = ConversationalRetrievalChain.from_llm(
         llm=ChatOpenAI(
             model_name="gpt-4o-mini",
-            temperature=0.1,
+            temperature=0.0,
             openai_api_key=os.getenv('OPENAI_API_KEY')
         ),
         retriever=vectorstore.as_retriever(
