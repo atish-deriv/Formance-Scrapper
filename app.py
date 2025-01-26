@@ -25,7 +25,7 @@ def initialize_validation_chain():
     """Initialize the validation chain with OpenAI."""
     # Create validation chain
     validation_chain = ChatOpenAI(
-        model_name="gpt-4",
+        model_name="gpt-4o-mini",
         temperature=0.1,
         openai_api_key=os.getenv('OPENAI_API_KEY')
     )
@@ -109,12 +109,12 @@ Assistant:
     # Create chain
     chain = ConversationalRetrievalChain.from_llm(
         llm=ChatOpenAI(
-            model_name="gpt-4",
-            temperature=0.0,
+            model_name="gpt-4o-mini",
+            temperature=0.1,
             openai_api_key=os.getenv('OPENAI_API_KEY')
         ),
         retriever=vectorstore.as_retriever(
-            search_kwargs={"k": 10},
+            search_kwargs={"k": 20},
             search_type="similarity",
             score_threshold=0.75
         ),
@@ -151,7 +151,7 @@ if st.session_state.conversation is None:
 # Streamlit interface
 st.title("Formance Assistant")
 st.write("Ask me anything about Formance! I'll help you find the information you need.")
-st.markdown("<small> ***Note:*** This is a beta version and the responses may not be 100% accurate. Please use with caution. Current version is 0.2.1</small>", unsafe_allow_html=True)
+st.markdown("<small> ***Note:*** This is a beta version and the responses may not be 100% accurate. Please use with caution. Current version is 0.2.2</small>", unsafe_allow_html=True)
 
 # Display chat history
 for idx, (question, answer) in enumerate(st.session_state.chat_history):
